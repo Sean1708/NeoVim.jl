@@ -1,5 +1,21 @@
 module NeoVim
 
-# package code goes here
+import MsgPack
+export Nvim
+
+include("nvim.jl")
+include("buffer.jl")
+include("window.jl")
+include("tabpage.jl")
+
+sanedict(d::Dict) = Dict([symbol(k) => sanedict(v) for (k, v) in d])
+sanedict(a::Array) = [sanedict(i) for i in a]
+sanedict(a::Array{UInt8}) = bytestring(a)
+sanedict(x) = x
+
+function api_info(n::Nvim)
+    write(n.conn, MsgPack.pack(Any[0, 0, "vim_get_api_info", []]))
+    return sanedict(MsgPack.unpack(n.conn)[4][2])
+end
 
 end # module
