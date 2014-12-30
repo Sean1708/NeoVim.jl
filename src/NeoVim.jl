@@ -14,8 +14,8 @@ sanedict(a::Array{UInt8}) = bytestring(a)
 sanedict(x) = x
 
 function api_info(n::Nvim)
-    write(n.conn, MsgPack.pack(Any[0, 0, "vim_get_api_info", []]))
-    return sanedict(MsgPack.unpack(n.conn)[4][2])
+    MsgPack.pack(n, Any[0, 0, "vim_get_api_info", []])
+    return sanedict(MsgPack.unpack(n)[4][2])
 end
 
 end # module

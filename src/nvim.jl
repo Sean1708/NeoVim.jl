@@ -28,3 +28,6 @@ function getindex(n::Nvim, name::Symbol)
         throw(KeyError(name))
     end
 end
+
+MsgPack.pack(n::Nvim, v) = MsgPack.pack(n.conn, v)
+MsgPack.unpack(n::Nvim) = MsgPack.unpack(n.conn)
