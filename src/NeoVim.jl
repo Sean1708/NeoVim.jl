@@ -9,8 +9,8 @@ include("window.jl")
 include("tabpage.jl")
 
 sanedict(d::Dict) = Dict([symbol(k) => sanedict(v) for (k, v) in d])
-sanedict(a::Array) = [sanedict(i) for i in a]
-sanedict(a::Array{UInt8}) = bytestring(a)
+sanedict(a::Vector) = [sanedict(i) for i in a]
+sanedict(a::Vector{UInt8}) = bytestring(a)
 sanedict(x) = x
 
 function api_info(n::Nvim)
