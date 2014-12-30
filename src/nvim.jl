@@ -1,4 +1,4 @@
-@doc """
+@doc doc"""
     Nvim([address,] port)
     Nvim(path)
 
@@ -7,11 +7,13 @@ signature which would return a `TCPSocket` or `Pipe` when passed to `connect`.
 """ ->
 type Nvim{T <: Union(Base.TCPSocket, Base.Pipe)}
     conn::T
+    id::Int
 end
 
 function Nvim(args...)
-    n = Nvim(connect(args...))
+    n = Nvim(connect(args...), 1)
     finalizer(n, close)
+    declare(n)
     return n
 end
 
