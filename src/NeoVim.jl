@@ -14,6 +14,10 @@ function __init__()
     oldaddr = get(ENV, "NVIM_LISTEN_ADDRESS", "")
     ENV["NVIM_LISTEN_ADDRESS"] = "127.0.0.1:6666"
 
+    # TODO: get the following to work
+    #c = setenv(`nvim`, Dict("NVIM_LISTEN_ADDRESS"=>"'127.0.0.1:6666'"))
+    #v = spawn(c)
+
     # TODO: have a way to allow users to specify program path
     v = spawn(`nvim`)
     n = Nvim(6666)
@@ -25,12 +29,16 @@ function __init__()
     else
         ENV["NVIM_LISTEN_ADDRESS"] = oldaddr
     end
+
+    declare_err(API)
 end
 
-type NeoVimException <: Exception
+type NeoVimError <: Exception
     id::Int
+    msg::UTF8String
 end
-# declare Base.showerr in declare()
+NeoVimError(id, msg::Vector{UInt8}) = NeoVimError(id, UTF8String(msg))
+NeoVimError(a::Vector) = NeoVimError(a[1], a[2])
 
 function request(n::Nvim, func::ByteString, args...)
     requestid = n.id
@@ -38,7 +46,7 @@ function request(n::Nvim, func::ByteString, args...)
     MsgPack.pack(n, Any[0, requestid, func, collect(args)])
 
     ret = MsgPack.unpack(n)
-    ret[3] === nothing || throw(NeoVimException(ret[3]))
+    ret[3] === nothing || throw(NeoVimError(ret[3]))
     return ret[4]
 end
 
