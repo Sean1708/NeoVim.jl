@@ -13,7 +13,6 @@ end
 function Nvim(args...)
     n = Nvim(connect(args...), 1)
     finalizer(n, close)
-    declare(n)
     return n
 end
 

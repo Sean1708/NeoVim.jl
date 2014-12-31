@@ -12,7 +12,3 @@ function api_info(n::Nvim)
     MsgPack.pack(n, Any[0, 0, "vim_get_api_info", []])
     return sanedict(MsgPack.unpack(n)[4][2])
 end
-
-function declare(n::Nvim)
-    @eval const API = api_info($n)
-end
