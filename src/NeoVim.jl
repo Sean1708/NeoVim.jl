@@ -11,10 +11,9 @@ include("declare.jl")
 
 function __init__()
     # TODO: have a way to allow users to specify program path
-    v = spawn(setenv(`nvim`, vcat(
-        ["$(k)=$(v)" for (k, v) in ENV],
-        "NVIM_LISTEN_ADDRESS=127.0.0.1:6666"
-    )))
+    env = Dict([k => v for (k,v) in ENV])
+    env["NVIM_LISTEN_ADDRESS"] = "127.0.0.1:6666"
+    v = spawn(setenv(`nvim`, env))
     n = Nvim(6666)
     global const API = api_info(n)
     close(n)
