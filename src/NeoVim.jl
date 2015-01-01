@@ -10,22 +10,16 @@ include("tabpage.jl")
 include("declare.jl")
 
 function __init__()
-    env = ["$(k)=$(v)" for (k, v) in ENV]
-    push!(env, "NVIM_LISTEN_ADDRESS=127.0.0.1:6666")
     # TODO: have a way to allow users to specify program path
-    v = spawn(setenv(`nvim`, env))
-    
+    v = spawn(setenv(`nvim`, vcat(
+        ["$(k)=$(v)" for (k, v) in ENV],
+        "NVIM_LISTEN_ADDRESS=127.0.0.1:6666"
+    )))
     n = Nvim(6666)
     global const API = sanedict(request(n, "vim_get_api_info")[2])
     close(n)
     # TODO: do this by sending :q! if possible
     kill(v)
-
-    if isempty(oldaddr)
-        delete!(ENV, "NVIM_LISTEN_ADDRESS")
-    else
-        ENV["NVIM_LISTEN_ADDRESS"] = oldaddr
-    end
 
     declare_err(API)
 end
