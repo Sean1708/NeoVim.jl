@@ -16,7 +16,7 @@ function __init__()
         "NVIM_LISTEN_ADDRESS=127.0.0.1:6666"
     )))
     n = Nvim(6666)
-    global const API = sanedict(request(n, "vim_get_api_info")[2])
+    global const API = api_info(n)
     close(n)
     # TODO: do this by sending :q! if possible
     kill(v)
