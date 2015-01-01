@@ -33,7 +33,7 @@ function __init__()
     declare_err(API)
 end
 
-type NeoVimError <: Exception
+immutable NeoVimError <: Exception
     id::Int
     msg::UTF8String
 end
