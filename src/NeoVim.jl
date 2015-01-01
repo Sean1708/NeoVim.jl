@@ -10,18 +10,15 @@ include("tabpage.jl")
 include("declare.jl")
 
 function __init__()
-    # TODO: what if people already have NVIM_LISTEN_ADDRESS set to an empty string?
-    oldaddr = get(ENV, "NVIM_LISTEN_ADDRESS", "")
-    ENV["NVIM_LISTEN_ADDRESS"] = "127.0.0.1:6666"
-
-    # TODO: get the following to work
-    #c = setenv(`nvim`, Dict("NVIM_LISTEN_ADDRESS"=>"'127.0.0.1:6666'"))
-    #v = spawn(c)
-
+    env = ["$(k)=$(v)" for (k, v) in ENV]
+    push!(env, "NVIM_LISTEN_ADDRESS=127.0.0.1:6666")
     # TODO: have a way to allow users to specify program path
-    v = spawn(`nvim`)
+    v = spawn(setenv(`nvim`, env))
+    
     n = Nvim(6666)
     global const API = sanedict(request(n, "vim_get_api_info")[2])
+    close(n)
+    # TODO: do this by sending :q! if possible
     kill(v)
 
     if isempty(oldaddr)
