@@ -3,13 +3,6 @@
  "vim_get_api_info") as possible.
 =#
 
-sanedict(d::Dict) = Dict([symbol(k) => sanedict(v) for (k, v) in d])
-sanedict(a::Vector) = [sanedict(i) for i in a]
-sanedict(a::Vector{UInt8}) = bytestring(a)
-sanedict(x) = x
-
-api_info(n::Nvim) = sanedict(request(n, "vim_get_api_info")[2])
-
 function declare_err(api::Dict)
     # function Base.showerr(io::IO, err::NeoVimError)
     #  if err.id == 0
@@ -26,7 +19,7 @@ function declare_err(api::Dict)
         :(Base.showerror(io::IO, err::NeoVimError))
     )
     currex = ex
-    for (id, name) in (Int64,ByteString)[(v[:id], string(k)) for (k, v) in api]
+    for (id, name) in (Int64,ByteString)[(v["id"], k) for (k, v) in api]
         push!(currex.args, Expr(
             :if,
             :(err.id == $id),
@@ -49,10 +42,10 @@ function declare_type(api::Dict)
     # or words to that effect.
     ex = Expr(
         :function, 
-        :(fromvimtype(n::Nvim, vt::MsgPack.Ext))
+        :(sanitize(n::Nvim, vt::MsgPack.Ext))
     )
     currex = ex
-    for (id, typ) in (Int64,Symbol)[(v[:id], k) for (k, v) in api]
+    for (id, typ) in (Int64,Symbol)[(v["id"], k) for (k, v) in api]
         push!(currex.args, Expr(
             :if,
             :(vt.typecode == $id),
@@ -60,6 +53,15 @@ function declare_type(api::Dict)
         ))
         currex = currex.args[end]
     end
-    push!(currex.args, :(error("OH MY GOD WHAT HAVE YOU DONE!")))
+    push!(currex.args, :(error("OH MY GOD WHAT HAVE THEY DONE!")))
     eval(ex)
 end
+
+function sanitize(n::Nvim, d::Dict)
+    Dict{UTF8String,Any}([bytestring(k) => sanitize(n, v) for (k, v) in d])
+end
+sanitize(n::Nvim, a::Vector) = [sanitize(n, i) for i in a]
+sanitize(::Nvim, a::Vector{UInt8}) = bytestring(a)
+sanitize(::Nvim, x) = x
+
+api_info(n::Nvim) = request(n, "vim_get_api_info")[2]

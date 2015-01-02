@@ -20,8 +20,9 @@ function __init__()
     # TODO: do this by sending :q! if possible
     kill(v)
 
-    declare_err(API[:error_types])
-    declare_type(API[:types])
+    declare_err(API["error_types"])
+    declare_type(API["types"])
+
 end
 
 immutable NeoVimError <: Exception
@@ -38,7 +39,7 @@ function request(n::Nvim, func::ByteString, args...)
 
     ret = MsgPack.unpack(n)
     ret[3] === nothing || throw(NeoVimError(ret[3]))
-    return ret[4]
+    return sanitize(n, ret[4])
 end
 
 end # module
