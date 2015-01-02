@@ -11,15 +11,55 @@ sanedict(x) = x
 api_info(n::Nvim) = sanedict(request(n, "vim_get_api_info")[2])
 
 function declare_err(api::Dict)
-    # TODO:
-     # I'm certain there's a type which is an optimized Dict for small maps which I could use here
-     # OR: there must be some way I could unroll this (maybe @nifs?)
-     # AND: I would rather use UTF8String(k) below but currently that throws MethodError
-    @eval begin
-        function Base.showerror(io::IO, err::NeoVimError)
-            errmap = $(Dict([v[:id] => string(k) for (k, v) in api[:error_types]]))
-            name = errmap[err.id]
-            print(io, string("NeoVim ", name, " error: ", err.msg))
-        end
+    # function Base.showerr(io::IO, err::NeoVimError)
+    #  if err.id == 0
+    #   print(io, "NeoVim ", "Validation", " Error: ", err.msg)
+    #  else
+    #   print(io, "NeoVim Unknown Error: ", err.msg)
+    #  end
+    # end
+    # pretty much.
+    # TODO: This works but I'm fairly sure it can be done much more simply.
+    #       Do I need to use Expr(...) in the push! or can I use :(...)?
+    ex = Expr(
+        :function,
+        :(Base.showerror(io::IO, err::NeoVimError))
+    )
+    currex = ex
+    for (id, name) in (Int64,ByteString)[(v[:id], string(k)) for (k, v) in api]
+        push!(currex.args, Expr(
+            :if,
+            :(err.id == $id),
+            :(print(io, "NeoVim ", $name, " Error: ", err.msg))
+        ))
+        currex = currex.args[end]
     end
+    push!(currex.args, :(print(io, "NeoVim Unknown Error: ", err.msg)))
+    eval(ex)
+end
+
+function declare_type(api::Dict)
+    # function fromvimtype(n::Nvim, vt::MsgPack.Ext)
+    #  if vt.typecode == 0
+    #   Buffer(n, vt)
+    #  else
+    #   error()
+    #  end
+    # end
+    # or words to that effect.
+    ex = Expr(
+        :function, 
+        :(fromvimtype(n::Nvim, vt::MsgPack.Ext))
+    )
+    currex = ex
+    for (id, typ) in (Int64,Symbol)[(v[:id], k) for (k, v) in api]
+        push!(currex.args, Expr(
+            :if,
+            :(vt.typecode == $id),
+            :($(typ)(n, vt))
+        ))
+        currex = currex.args[end]
+    end
+    push!(currex.args, :(error("OH MY GOD WHAT HAVE YOU DONE!")))
+    eval(ex)
 end

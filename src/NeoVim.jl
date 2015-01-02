@@ -1,7 +1,7 @@
 module NeoVim
 
 import MsgPack
-export Nvim, request
+export Nvim, NeoVimError, request
 
 include("nvim.jl")
 include("buffer.jl")
@@ -20,7 +20,8 @@ function __init__()
     # TODO: do this by sending :q! if possible
     kill(v)
 
-    declare_err(API)
+    declare_err(API[:error_types])
+    declare_type(API[:types])
 end
 
 immutable NeoVimError <: Exception

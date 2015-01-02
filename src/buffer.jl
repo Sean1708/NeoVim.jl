@@ -1,7 +1,7 @@
 @doc doc"""Represents a NeoVim buffer.""" ->
 type Buffer
     nvim::Nvim
-    ext::MsgPack.Ext
+    data::MsgPack.Ext
 end
 
 Base.length(b::Buffer) = :buffer_line_count
