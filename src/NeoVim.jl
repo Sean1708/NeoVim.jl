@@ -14,6 +14,9 @@ function __init__()
     env = Dict([k => v for (k,v) in ENV])
     env["NVIM_LISTEN_ADDRESS"] = "127.0.0.1:6666"
     v = spawn(setenv(`nvim`, env))
+    # TODO: this is a symptom of shoddy design, possibly use --embed
+    #       this might also be a bug in `spawn` (^ is still true though)
+    sleep(0.001)
     n = Nvim(6666)
     global const API = api_info(n)
     close(n)
