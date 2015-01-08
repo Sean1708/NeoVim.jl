@@ -7,7 +7,7 @@ include("nvim.jl")
 include("buffer.jl")
 include("window.jl")
 include("tabpage.jl")
-include("declare.jl")
+include("api.jl")
 
 function __init__()
     # TODO: have a way to allow users to specify program path
