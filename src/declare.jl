@@ -1,6 +1,6 @@
 #=
- The functions in this document declare the entire low-level API at module load
- by parsing the Dict returned from "vim_get_api_info".
+ This file declares as much of the Plugin API (as dictated by
+ "vim_get_api_info") as possible.
 =#
 
 function declare_err(api::Dict)
@@ -32,7 +32,7 @@ function declare_err(api::Dict)
 end
 
 function declare_type(api::Dict)
-    # function sanitize(n::Nvim, vt::MsgPack.Ext)
+    # function fromvimtype(n::Nvim, vt::MsgPack.Ext)
     #  if vt.typecode == 0
     #   Buffer(n, vt)
     #  else
@@ -41,7 +41,7 @@ function declare_type(api::Dict)
     # end
     # or words to that effect.
     ex = Expr(
-        :function,
+        :function, 
         :(sanitize(n::Nvim, vt::MsgPack.Ext))
     )
     currex = ex
@@ -65,7 +65,3 @@ sanitize(::Nvim, a::Vector{UInt8}) = bytestring(a)
 sanitize(::Nvim, x) = x
 
 api_info(n::Nvim) = request(n, "vim_get_api_info")[2]
-
-function declare_func(api::Vector{Dict})
-    for d in api
-
