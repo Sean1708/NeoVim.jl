@@ -23,8 +23,8 @@ function __init__()
     # TODO: do this by sending :q! if possible
     kill(v)
 
-    declare_err(API[:error_types])
-    declare_type(API[:types])
+    declare_err(API["error_types"])
+    declare_type(API["types"])
 
 end
 
