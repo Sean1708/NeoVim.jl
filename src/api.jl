@@ -58,7 +58,7 @@ function declare_type(api::Dict)
 end
 
 function sanitize(n::Nvim, d::Dict)
-    Dict{UTF8String,Any}([Symbol(k) => sanitize(n, v) for (k, v) in d])
+    Dict{UTF8String,Any}([bytestring(k) => sanitize(n, v) for (k, v) in d])
 end
 sanitize(n::Nvim, a::Vector) = [sanitize(n, i) for i in a]
 sanitize(::Nvim, a::Vector{UInt8}) = bytestring(a)
@@ -66,11 +66,12 @@ sanitize(::Nvim, x) = x
 
 api_info(n::Nvim) = request(n, "vim_get_api_info")[2]
 
-function declare_func(api::Vector{Dict})
-    for d in api
-        vimnm = d["name"]
-        typenm = split(vimnm, '_', keep=false)
-        funcnm = join(typenm[2:end], "")
-
-
-        if typenm == "vim"
+#function declare_func(api::Vector{Dict})
+#    for d in api
+#        vimnm = d["name"]
+#        typenm = split(vimnm, '_', keep=false)
+#        funcnm = join(typenm[2:end], "")
+#
+#
+#
+#        if typenm == "vim"
