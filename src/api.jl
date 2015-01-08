@@ -19,7 +19,7 @@ function declare_err(api::Dict)
         :(Base.showerror(io::IO, err::NeoVimError))
     )
     currex = ex
-    for (id, name) in (Int64,ByteString)[(v["id"], k) for (k, v) in api]
+    for (id, name) in (Int64,ByteString)[(v[:id], k) for (k, v) in api]
         push!(currex.args, Expr(
             :if,
             :(err.id == $id),
@@ -45,7 +45,7 @@ function declare_type(api::Dict)
         :(sanitize(n::Nvim, vt::MsgPack.Ext))
     )
     currex = ex
-    for (id, typ) in (Int64,Symbol)[(v["id"], k) for (k, v) in api]
+    for (id, typ) in (Int64,Symbol)[(v[:id], k) for (k, v) in api]
         push!(currex.args, Expr(
             :if,
             :(vt.typecode == $id),
@@ -58,7 +58,7 @@ function declare_type(api::Dict)
 end
 
 function sanitize(n::Nvim, d::Dict)
-    Dict{UTF8String,Any}([bytestring(k) => sanitize(n, v) for (k, v) in d])
+    Dict{UTF8String,Any}([Symbol(k) => sanitize(n, v) for (k, v) in d])
 end
 sanitize(n::Nvim, a::Vector) = [sanitize(n, i) for i in a]
 sanitize(::Nvim, a::Vector{UInt8}) = bytestring(a)
