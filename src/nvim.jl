@@ -5,18 +5,46 @@
 Represents a particular NeoVim instance. Can be instantiated with any method
 signature which would return a `TCPSocket` or `Pipe` when passed to `connect`.
 """ ->
-type Nvim{T <: Union(Base.TCPSocket, Base.Pipe)}
-    conn::T
-    id::Int
+type Nvim{T}
+    recstream::T
+    sendstream::T
+    reqid::Int
 end
 
-function Nvim(args...)
-    n = Nvim(connect(args...), 1)
+function Nvim{T <: Base.AsyncStream}(ins::T, outs::T)
+    n = Nvim(ins, outs, 1)
     finalizer(n, close)
-    return n
+    n
 end
 
-Base.close(n::Nvim) = close(n.conn)
+function Nvim(::Type{Val{:Embedded}})
+    ins, outs = STDIN, STDOUT
+
+    # TODO: use proper logging (Logging.jl, LumberJack.jl) and a more correct file path
+    logfile = open(joinpath(homedir(), ".neovim.jl.log"), "a")
+    println(logfile, "Log starting $(now())\n===")
+    redirect_stdout(logfile)
+    redirect_stderr(logfile)
+    redirect_stdin()
+
+    Nvim(ins, outs)
+end
+
+function Nvim(::Type{Val{:Spawn}})
+    ins, outs, proc = readandwrite(`nvim --embed`)
+    Nvim(ins, outs), proc
+end
+
+# TODO: would it be better to split this up?
+function Nvim(args...)
+    conn = connect(args...)
+    Nvim(conn, conn)
+end
+
+function Base.close(n::Nvim)
+    close(n.recstream)
+    close(n.sendstream)
+end
 
 function getindex(n::Nvim, name::Symbol)
     if name === :buffers
@@ -30,5 +58,5 @@ function getindex(n::Nvim, name::Symbol)
     end
 end
 
-MsgPack.pack(n::Nvim, v) = MsgPack.pack(n.conn, v)
-MsgPack.unpack(n::Nvim) = MsgPack.unpack(n.conn)
+MsgPack.pack(n::Nvim, v) = MsgPack.pack(n.sendstream, v)
+MsgPack.unpack(n::Nvim) = MsgPack.unpack(n.recstream)

@@ -36,8 +36,8 @@ NeoVimError(id, msg::Vector{UInt8}) = NeoVimError(id, UTF8String(msg))
 NeoVimError(a::Vector) = NeoVimError(a[1], a[2])
 
 function request(n::Nvim, func::ByteString, args...)
-    requestid = n.id
-    n.id += 1
+    requestid = n.reqid
+    n.reqid += 1
     MsgPack.pack(n, Any[0, requestid, func, collect(args)])
 
     ret = MsgPack.unpack(n)

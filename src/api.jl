@@ -76,7 +76,7 @@ function vimtojulia(s)
     elseif s == "Float"
         return :Float64
     elseif s == "String"
-        return :UTF8String
+        return :ByteString
     elseif s == "Array"
         return :Vector
     elseif s == "Dictionary"
@@ -91,7 +91,7 @@ function declare_func(api::Vector)
         vimnm = d["name"]
         typenm = split(vimnm, '_', keep=false)
         typenm, funcnm = typenm[1], join(typenm[2:end], "_")
-        funcnm == "eval" && (funcnm = "vimeval")
+        funcnm == "eval" && (funcnm = "vim_eval")
 
         args = (Symbol, Symbol)[]
         for (typ, nam) in d["parameters"]
