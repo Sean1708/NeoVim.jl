@@ -1,5 +1,5 @@
 @doc doc"""Represents a NeoVim tabpage.""" ->
-type TabPage
+type Tabpage
     nvim::Nvim
     ext::MsgPack.Ext
 end

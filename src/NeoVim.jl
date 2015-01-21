@@ -25,7 +25,7 @@ function __init__()
 
     declare_err(API["error_types"])
     declare_type(API["types"])
-
+    declare_func(API["functions"])
 end
 
 immutable NeoVimError <: Exception

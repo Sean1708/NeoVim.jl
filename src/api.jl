@@ -66,12 +66,65 @@ sanitize(::Nvim, x) = x
 
 api_info(n::Nvim) = request(n, "vim_get_api_info")[2]
 
-#function declare_func(api::Vector{Dict})
-#    for d in api
-#        vimnm = d["name"]
-#        typenm = split(vimnm, '_', keep=false)
-#        funcnm = join(typenm[2:end], "")
-#
-#
-#
-#        if typenm == "vim"
+function vimtojulia(s)
+    if s == "Nil"
+        return :Void
+    elseif s == "Boolean"
+        return :Bool
+    elseif s == "Integer"
+        return :Int64
+    elseif s == "Float"
+        return :Float64
+    elseif s == "String"
+        return :UTF8String
+    elseif s == "Array"
+        return :Vector
+    elseif s == "Dictionary"
+        return :Dict
+    else
+        return :Any
+    end
+end
+
+function declare_func(api::Vector)
+    for d in api
+        vimnm = d["name"]
+        typenm = split(vimnm, '_', keep=false)
+        typenm, funcnm = typenm[1], join(typenm[2:end], "_")
+        funcnm == "eval" && (funcnm = "vimeval")
+
+        args = (Symbol, Symbol)[]
+        for (typ, nam) in d["parameters"]
+            nam == "end" && (nam = "finish")
+            push!(args, (nam, vimtojulia(typ)))
+        end
+
+        if typenm == "vim"
+            typenm = "nvim"
+        else
+            shift!(args)
+        end
+        unshift!(args, (typenm, ucfirst(typenm)))
+
+        eval(Expr(
+            :function,
+            Expr(:call, symbol(funcnm), [:($nm::$tnm) for (nm, tnm) in args]...),
+            Expr(
+                :call,
+                :request,
+                if args[1][2] == :Nvim
+                    args[1][1]
+                else
+                    :($(args[1][1]).nvim)
+                end,
+                vimnm,
+                (if args[1][2] == :Nvim
+                    [nm for (nm, _) in args[2:end]]
+                else
+                    cont = shift!(args)[1]
+                    vcat(:($(cont).data), [nm for (nm, _) in args])
+                end)...
+            )
+        ))
+    end
+end
