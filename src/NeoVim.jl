@@ -1,7 +1,11 @@
 module NeoVim
 
+using Compat
+using Docile
 import MsgPack
 export Nvim, NeoVimError, request
+
+immutable Val{T} end
 
 include("nvim.jl")
 include("buffer.jl")
@@ -11,7 +15,7 @@ include("api.jl")
 
 function __init__()
     # TODO: have a way to allow users to specify program path
-    env = Dict([k => v for (k,v) in ENV])
+    @compat env = Dict([k => v for (k,v) in ENV])
     env["NVIM_LISTEN_ADDRESS"] = "127.0.0.1:6666"
     v = spawn(setenv(`nvim`, env))
     # TODO: this is a symptom of shoddy design, possibly use --embed
@@ -31,7 +35,7 @@ immutable NeoVimError <: Exception
     id::Int
     msg::UTF8String
 end
-NeoVimError(id, msg::Vector{UInt8}) = NeoVimError(id, UTF8String(msg))
+@compat NeoVimError(id, msg::Vector{UInt8}) = NeoVimError(id, UTF8String(msg))
 NeoVimError(a::Vector) = NeoVimError(a[1], a[2])
 
 function request(n::Nvim, func::ByteString, args...)

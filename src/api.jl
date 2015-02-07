@@ -58,7 +58,7 @@ function declare_type(api::Dict)
 end
 
 function sanitize(n::Nvim, d::Dict)
-    Dict{UTF8String,Any}([bytestring(k) => sanitize(n, v) for (k, v) in d])
+    @compat Dict{UTF8String,Any}([bytestring(k) => sanitize(n, v) for (k, v) in d])
 end
 sanitize(n::Nvim, a::Vector) = [sanitize(n, i) for i in a]
 sanitize(::Nvim, a::Vector{UInt8}) = bytestring(a)
@@ -89,7 +89,7 @@ end
 function declare_func(api::Vector)
     for d in api
         vimnm = d["name"]
-        typenm = split(vimnm, '_', keep=false)
+        @compat typenm = split(vimnm, '_', keep=false)
         typenm, funcnm = typenm[1], join(typenm[2:end], "_")
         funcnm == "eval" && (funcnm = "vim_eval")
 
