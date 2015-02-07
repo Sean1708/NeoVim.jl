@@ -31,6 +31,7 @@ function Nvim(::Type{Val{:Embedded}})
 end
 
 function Nvim(::Type{Val{:Spawn}})
+    # TODO: have a way to allow users to specify program path
     ins, outs, proc = readandwrite(`nvim --embed`)
     Nvim(ins, outs), proc
 end

@@ -14,17 +14,11 @@ include("tabpage.jl")
 include("api.jl")
 
 function __init__()
-    # TODO: have a way to allow users to specify program path
-    @compat env = Dict([k => v for (k,v) in ENV])
-    env["NVIM_LISTEN_ADDRESS"] = "127.0.0.1:6666"
-    v = spawn(setenv(`nvim`, env))
-    # TODO: this is a symptom of shoddy design, possibly use --embed
-    sleep(0.001)
-    n = Nvim(6666)
+    n, p = Nvim(Val{:Spawn})
     global const API = api_info(n)
     close(n)
     # TODO: do this by sending :q! if possible
-    kill(v)
+    kill(p)
 
     declare_err(API["error_types"])
     declare_type(API["types"])
