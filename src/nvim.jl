@@ -21,11 +21,12 @@ function Nvim(::Type{Val{:Embedded}})
     ins, outs = STDIN, STDOUT
 
     # TODO: use proper logging (Logging.jl, LumberJack.jl) and a more correct file path
-    logfile = open(joinpath(homedir(), ".neovim.jl.log"), "a")
-    println(logfile, "Log starting $(now())\n===")
-    redirect_stdout(logfile)
-    redirect_stderr(logfile)
-    redirect_stdin()
+    # TODO: uncommenting just the first line breaks this
+    #logfile = open(joinpath(homedir(), ".neovim.jl.log"), "a")
+    #println(logfile, "Log starting $(now())\n===")
+    #redirect_stdout(logfile)
+    #redirect_stderr(logfile)
+    #redirect_stdin()
 
     Nvim(ins, outs)
 end

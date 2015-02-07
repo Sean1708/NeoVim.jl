@@ -89,10 +89,11 @@ end
 function declare_func(api::Vector)
     for d in api
         vimnm = d["name"]
+        # need to know the type of the first argument
         @compat typenm = split(vimnm, '_', keep=false)
-        typenm, funcnm = typenm[1], join(typenm[2:end], "_")
-        funcnm == "eval" && (funcnm = "vim_eval")
+        typenm, funcnm = typenm[1], join(typenm[1:end], "_")
 
+        # TODO: would ignoring the types make this simpler?
         args = (Symbol, Symbol)[]
         for (typ, nam) in d["parameters"]
             nam == "end" && (nam = "finish")
@@ -102,6 +103,7 @@ function declare_func(api::Vector)
         if typenm == "vim"
             typenm = "nvim"
         else
+            # the type is already given for non "vim_" commands so remove it
             shift!(args)
         end
         unshift!(args, (typenm, ucfirst(typenm)))
