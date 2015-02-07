@@ -50,11 +50,11 @@ end
 
 function getindex(n::Nvim, name::Symbol)
     if name === :buffers
-        return :vim_get_buffers
+        return vim_get_buffers(n)
     elseif name === :windows
-        return :vim_get_windows
+        return vim_get_windows(n)
     elseif name === :tabpages
-        return :vim_get_tabpages
+        return vim_get_tabpages(n)
     else
         throw(KeyError(name))
     end
