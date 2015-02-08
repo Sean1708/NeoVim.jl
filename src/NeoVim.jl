@@ -65,6 +65,8 @@ function eventloop(nvim::Nvim, data)
             # TODO: get logging sorted out
             try
                 request_callback(Val{event}, nvim, reqid, args, data)
+            catch err
+                error(nvim, reqid, string(err))
             end
         elseif msgtype == RESPONSE
             # TODO: make requests asynchronous
