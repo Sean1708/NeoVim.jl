@@ -83,4 +83,8 @@ function request_callback(::Any, nvim, reqid, args, data)
     error(nvim, reqid, "Unable to handle event.")
 end
 
+function notification_callback(::Any, nvim, args, data)
+    throw(NeoVimError(-1, "You must define a notification_callback method."))
+end
+
 end # module
