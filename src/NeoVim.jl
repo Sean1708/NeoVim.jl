@@ -36,15 +36,18 @@ const REQUEST = 0
 const RESPONSE = 1
 const NOTIFICATION = 2
 
-# TODO: make non-bocking
 function request(n::Nvim, func::ByteString, args...)
     requestid = n.reqid
     n.reqid += 1
+
     MsgPack.pack(n, Any[REQUEST, requestid, func, collect(args)])
 
-    ret = MsgPack.unpack(n)
-    ret[3] === nothing || throw(NeoVimError(ret[3]))
-    return sanitize(n, ret[4])
+    err, res = MsgPack.unpack(n)[3:4]
+    if err !== nothing
+        throw(NeoVimError(err))
+    else
+        return sanitize(res)
+    end
 end
 function respond(n::Nvim, reqid, args...)
     MsgPack.pack(n, Any[RESPONSE, reqid, nothing, collect(args)])
@@ -52,8 +55,7 @@ end
 Base.error(n::Nvim, reqid, msg) = MsgPack.pack(n, Any[RESPONSE, reqid, msg, nothing])
 
 function eventloop(nvim::Nvim, data)
-    #@async while true
-    while true
+    @async while true
         msg = MsgPack.unpack(nvim)
         msgtype = msg[1]
         if msgtype == REQUEST
@@ -62,11 +64,10 @@ function eventloop(nvim::Nvim, data)
             args = sanitize(nvim, msg[4])
             # TODO: get logging sorted out
             try
-                #@async request_callback(Val{event}, nvim, reqid, args, data)
                 request_callback(Val{event}, nvim, reqid, args, data)
             end
         elseif msgtype == RESPONSE
-            # TODO: not yet async
+            # TODO: make requests asynchronous
         elseif msgtype == NOTIFICATION
             event = symbol(msg[2])
             args = sanitize(nvim, msg[3])

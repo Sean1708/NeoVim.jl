@@ -8,6 +8,7 @@ signature which would return a `TCPSocket` or `Pipe` when passed to `connect`.
 type Nvim{T}
     recstream::T
     sendstream::T
+
     reqid::Int
 end
 
