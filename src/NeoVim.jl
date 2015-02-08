@@ -46,7 +46,9 @@ function request(n::Nvim, func::ByteString, args...)
     ret[3] === nothing || throw(NeoVimError(ret[3]))
     return sanitize(n, ret[4])
 end
-respond(n::Nvim, reqid, val) = MsgPack.pack(n, Any[RESPONSE, reqid, nothing, val])
+function respond(n::Nvim, reqid, args...)
+    MsgPack.pack(n, Any[RESPONSE, reqid, nothing, collect(args)])
+end
 Base.error(n::Nvim, reqid, msg) = MsgPack.pack(n, Any[RESPONSE, reqid, msg, nothing])
 
 function eventloop(nvim::Nvim, data)
