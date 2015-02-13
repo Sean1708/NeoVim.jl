@@ -46,7 +46,7 @@ function request(n::Nvim, func::ByteString, args...)
     if err !== nothing
         throw(NeoVimError(err))
     else
-        return sanitize(res)
+        return sanitize(n, res)
     end
 end
 function respond(n::Nvim, reqid, args...)
